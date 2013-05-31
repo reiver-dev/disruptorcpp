@@ -14,7 +14,7 @@ class BatchEventProcessor {
 public:
 
 	typedef RingBuffer RingBuffer_t;
-	typedef SequenceBarrier SequenceBarrier_t;
+	typedef typename RingBuffer::SequenceBarrier_t SequenceBarrier_t;
 	typedef EventHandler<typename RingBuffer::ValueType> EventHandler_t;
 
 	BatchEventProcessor(RingBuffer_t *ringBuffer,
@@ -22,40 +22,36 @@ public:
 			m_running(false),
 			m_ringBuffer(ringBuffer),
 			m_sequenceBarrier(sequenceBarrier),
-			m_eventHandler(eventHandler),
-			m_waitStrategy(ringBuffer->getWaitStrategy()) {
+			m_eventHandler(eventHandler) {
 
 	}
 
-    Sequence* getSequence()
-    {
-        return &m_sequence;
-    }
+	Sequence* getSequence() {
+		return &m_sequence;
+	}
 
 	void halt() {
 		m_running.store(false);
-		m_sequenceBarrier->alert(m_waitStrategy);
+		m_sequenceBarrier->alert();
 	}
 
-    void run()
-    {
-    	bool fls = false;
-    	if (!m_running.compare_exchange_strong(fls, true)) {
-    		throw std::runtime_error("Already running");
-    	}
+	void run() {
+		bool fls = false;
+		if (!m_running.compare_exchange_strong(fls, true)) {
+			throw std::runtime_error("Already running");
+		}
 
-        m_sequenceBarrier->clearAlert();
+		m_sequenceBarrier->clearAlert();
 
-        typename RingBuffer::ValueType* event = nullptr;
+		typename RingBuffer::ValueType* event = nullptr;
 
-        long nextSequence = m_sequence.get() + 1L;
+		long nextSequence = m_sequence.get() + 1L;
 		while (true) {
 			try {
-				long availableSequence = m_sequenceBarrier->waitFor(nextSequence, m_waitStrategy);
+				long availableSequence = m_sequenceBarrier->waitFor(nextSequence);
 				while (nextSequence <= availableSequence) {
-					event = m_ringBuffer->getPublished(nextSequence);
-					m_eventHandler->onEvent(nextSequence,
-							nextSequence == availableSequence, event);
+					event = m_ringBuffer->get(nextSequence);
+					m_eventHandler->onEvent(nextSequence, nextSequence == availableSequence, event);
 					nextSequence++;
 				}
 				m_sequence.set(availableSequence);
@@ -64,8 +60,8 @@ public:
 					break;
 			}
 		}
-        m_running.store(false);
-    }
+		m_running.store(false);
+	}
 
 	void notifyTimeout(long availableSequence) {
 	}
@@ -78,13 +74,11 @@ private:
 
 	std::atomic<bool> m_running;
 
-    Sequence m_sequence;
+	Sequence m_sequence;
 
-    RingBuffer_t *const m_ringBuffer;
-    SequenceBarrier_t *const m_sequenceBarrier;
-    EventHandler_t *const m_eventHandler;
-
-    typename RingBuffer::WaitStrategy_t& m_waitStrategy;
+	RingBuffer_t * const m_ringBuffer;
+	SequenceBarrier_t * const m_sequenceBarrier;
+	EventHandler_t * const m_eventHandler;
 
 };
 

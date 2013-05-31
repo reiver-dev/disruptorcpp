@@ -20,17 +20,17 @@ public:
 		sequences.assign(collection.begin(), collection.end());
 	}
 
-    long get() const {
+	long get() const {
 		return Util::getMinimumSequence(sequences);
 	}
 
-    bool isEmpty() const {
-    	return sequences.size() == 0;
-    }
+	bool isEmpty() const {
+		return sequences.size() == 0;
+	}
 
-    const std::vector<Sequence *>& data() const {
-    	return sequences;
-    }
+	const std::vector<Sequence *>& data() const {
+		return sequences;
+	}
 
 private:
 	std::vector<Sequence *> sequences;

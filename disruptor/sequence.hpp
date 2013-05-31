@@ -62,9 +62,10 @@ public:
 	}
 
 	DoublePaddedSequence(long initial_value) : FlatSequence(initial_value) {
-    	//
-    }
-    DISALLOW_COPY_ASSIGN_MOVE(DoublePaddedSequence);
+		//
+	}
+
+	DISALLOW_COPY_ASSIGN_MOVE(DoublePaddedSequence);
 };
 
 class PaddedSequence : public FlatSequence {
@@ -73,13 +74,14 @@ public:
 		//
 	}
 
-    PaddedSequence(long initial_value) : FlatSequence(initial_value) {
-    	//
-    }
+	PaddedSequence(long initial_value) : FlatSequence(initial_value) {
+		//
+	}
 
-    char pad[ATOMIC_SEQUENCE_PADDING_LENGTH / 2];
+	char pad[ATOMIC_SEQUENCE_PADDING_LENGTH / 2];
 
-    DISALLOW_COPY_ASSIGN_MOVE(PaddedSequence);
+	DISALLOW_COPY_ASSIGN_MOVE(PaddedSequence)
+	;
 };
 
 typedef DoublePaddedSequence Sequence;

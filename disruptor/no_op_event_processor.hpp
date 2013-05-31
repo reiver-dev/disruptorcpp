@@ -3,10 +3,10 @@
 
 #include "ring_buffer.hpp"
 
-template<class T, typename ClaimStrategy, typename WaitStrategy>
+template<class T, typename Sequencer, typename WaitStrategy>
 class NoOpEventProcessor {
 
-	typedef RingBuffer<T, ClaimStrategy, WaitStrategy> RingBuffer_t;
+	typedef RingBuffer<T, Sequencer, WaitStrategy> RingBuffer_t;
 
 public:
 

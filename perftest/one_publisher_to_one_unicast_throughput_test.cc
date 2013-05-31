@@ -34,51 +34,50 @@
 #include <disruptor.hpp>
 #include "../test/support/stub_event.h"
 
-typedef RingBuffer<StubEvent, SingleThreadClaimStrategy, YieldStrategy> RingBuffer_t;
+typedef RingBuffer<StubEvent, SingleProducerSequencer, YieldStrategy> RingBuffer_t;
 typedef BatchEventProcessor<RingBuffer_t> EventProcessor_t;
 
-
 int main(int arc, char** argv) {
-    int buffer_size = 1024 * 8;
-    long iterations = 1000L * 1000L * 300;
+	int buffer_size = 1024 * 8;
+	long iterations = 1000L * 1000L * 3000;
 
 	RingBuffer_t ring_buffer(buffer_size, StubEventFactory());
 
-    std::vector<Sequence*> sequence_to_track(0);
-    SequenceBarrier barrier(ring_buffer, sequence_to_track);
+	std::vector<Sequence*> sequence_to_track(0);
+	RingBuffer_t::SequenceBarrier_t barrier(ring_buffer, sequence_to_track);
 
-    StubBatchHandler stub_handler;
-    //IgnoreExceptionHandler<StubEvent> stub_exception_handler;
-    EventProcessor_t processor(&ring_buffer, &barrier, &stub_handler);
+	StubBatchHandler stub_handler;
+	//IgnoreExceptionHandler<StubEvent> stub_exception_handler;
+	EventProcessor_t processor(&ring_buffer, &barrier, &stub_handler);
 
-    std::thread consumer(std::ref<EventProcessor_t>(processor));
+	std::thread consumer(std::ref<EventProcessor_t>(processor));
 
-    struct timeval start_time, end_time;
+	struct timeval start_time, end_time;
 
-    gettimeofday(&start_time, NULL);
+	gettimeofday(&start_time, NULL);
 
-    StubEventTranslator translator;
-    for (long i=0; i<iterations; i++) {
-    	ring_buffer.publishEvent(translator);
-    }
+	StubEventTranslator translator;
+	for (long i = 0; i < iterations; i++) {
+		ring_buffer.publishEvent(translator);
+	}
 
-    long expected_sequence = ring_buffer.getCursor();
-    while (processor.getSequence()->get() < expected_sequence) {}
+	long expected_sequence = ring_buffer.getCursor();
+	while (processor.getSequence()->get() < expected_sequence) {
+	}
 
-    gettimeofday(&end_time, NULL);
+	gettimeofday(&end_time, NULL);
 
-    double start, end;
-    start = start_time.tv_sec + ((double) start_time.tv_usec / 1000000);
-    end = end_time.tv_sec + ((double) end_time.tv_usec / 1000000);
+	double start, end;
+	start = start_time.tv_sec + ((double) start_time.tv_usec / 1000000);
+	end = end_time.tv_sec + ((double) end_time.tv_usec / 1000000);
 
-    std::cout.precision(15);
-    std::cout << "1P-1EP-UNICAST performance: ";
-    std::cout << (iterations * 1.0) / (end - start)
-              << " ops/secs" << std::endl;
+	std::cout.precision(15);
+	std::cout << "1P-1EP-UNICAST performance: ";
+	std::cout << (iterations * 1.0) / (end - start) << " ops/secs" << std::endl;
 
-    processor.halt();
-    consumer.join();
+	processor.halt();
+	consumer.join();
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 

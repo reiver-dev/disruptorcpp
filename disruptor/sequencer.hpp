@@ -19,13 +19,14 @@ public:
 };
 */
 
+
 class SingleProducerSequencer {
 private:
-    struct Padding {
-    	long nextValue = Sequence::INITIAL_VALUE;
-    	long cachedValue = Sequence::INITIAL_VALUE;
-    	long pad[7];
-    };
+	struct Padding {
+		long nextValue = Sequence::INITIAL_VALUE;
+		long cachedValue = Sequence::INITIAL_VALUE;
+		long pad[7];
+	};
 
 public:
 
@@ -106,10 +107,32 @@ public:
 		pad.nextValue = sequence;
 	}
 
+	template<class WaitStrategy>
+	void publish(long sequence, WaitStrategy& waitStrategy) {
+		m_cursor.set(sequence);
+		waitStrategy.signalAllWhenBlocking();
+	}
+
+	void ensureAvailable(long sequence) {
+		//
+	}
+
+	bool isAvailable(long sequence) const {
+		return sequence <= m_cursor.get();
+	}
+
+	const Sequence& getCursorSequence() const {
+		return m_cursor;
+	}
+
+	Sequence& getCursorSequence() {
+		return m_cursor;
+	}
 
 private:
-    int bufferSize;
-    Padding pad;
+	int bufferSize;
+	Sequence m_cursor;
+	Padding pad;
 };
 
 

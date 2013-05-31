@@ -35,72 +35,75 @@
 
 #include "../test/support/stub_event.h"
 
-typedef RingBuffer<StubEvent, SingleThreadClaimStrategy, YieldStrategy> RingBuffer_t;
+typedef RingBuffer<StubEvent, SingleProducerSequencer, YieldStrategy> RingBuffer_t;
 typedef BatchEventProcessor<RingBuffer_t> EventProcessor_t;
+typedef RingBuffer_t::SequenceBarrier_t SequenceBarrier_t;
 
 int main(int arc, char** argv) {
-    int buffer_size = 1024 * 8;
-    long iterations = 1000L * 1000L * 300;
+	int buffer_size = 1024 * 8;
+	long iterations = 1000L * 1000L * 3000;
 
-    RingBuffer_t ring_buffer(buffer_size, StubEventFactory());
+	RingBuffer_t ring_buffer(buffer_size, StubEventFactory());
 
-    // one exception handler
-    // one event handler
-    StubBatchHandler stub_handler;
+	// one exception handler
+	// one event handler
+	StubBatchHandler stub_handler;
 
-    std::vector<Sequence*> sequence_to_track(0);
+	std::vector<Sequence*> sequence_to_track(0);
 
-    SequenceBarrier first_barrier(ring_buffer, sequence_to_track);
-    EventProcessor_t first_processor(&ring_buffer, &first_barrier, &stub_handler);
+	SequenceBarrier_t first_barrier(ring_buffer, sequence_to_track);
+	EventProcessor_t first_processor(&ring_buffer, &first_barrier,
+			&stub_handler);
 
-    sequence_to_track.clear();
-    sequence_to_track.push_back(first_processor.getSequence());
+	sequence_to_track.clear();
+	sequence_to_track.push_back(first_processor.getSequence());
 
-    SequenceBarrier second_barrier(ring_buffer, sequence_to_track);
-	EventProcessor_t second_processor(&ring_buffer, &second_barrier, &stub_handler);
+	SequenceBarrier_t second_barrier(ring_buffer, sequence_to_track);
+	EventProcessor_t second_processor(&ring_buffer, &second_barrier,
+			&stub_handler);
 
-    sequence_to_track.clear();
-    sequence_to_track.push_back(second_processor.getSequence());
+	sequence_to_track.clear();
+	sequence_to_track.push_back(second_processor.getSequence());
 
-    SequenceBarrier third_barrier(ring_buffer, sequence_to_track);
-	EventProcessor_t third_processor(&ring_buffer, &third_barrier,	&stub_handler);
+	SequenceBarrier_t third_barrier(ring_buffer, sequence_to_track);
+	EventProcessor_t third_processor(&ring_buffer, &third_barrier,
+			&stub_handler);
 
+	std::thread first_consumer(std::ref<EventProcessor_t>(first_processor));
+	std::thread second_consumer(std::ref<EventProcessor_t>(second_processor));
+	std::thread third_consumer(std::ref<EventProcessor_t>(third_processor));
 
-    std::thread first_consumer(std::ref<EventProcessor_t>(first_processor));
-    std::thread second_consumer(std::ref<EventProcessor_t>(second_processor));
-    std::thread third_consumer(std::ref<EventProcessor_t>(third_processor));
+	struct timeval start_time, end_time;
 
-    struct timeval start_time, end_time;
+	gettimeofday(&start_time, NULL);
 
-    gettimeofday(&start_time, NULL);
+	StubEventTranslator translator;
+	for (long i = 0; i < iterations; i++) {
+		ring_buffer.publishEvent(translator);
+	}
 
-    StubEventTranslator translator;
-    for (long i=0; i<iterations; i++) {
-        ring_buffer.publishEvent(translator);
-    }
+	long expected_sequence = ring_buffer.getCursor();
+	while (third_processor.getSequence()->get() < expected_sequence) {
+	}
 
-    long expected_sequence = ring_buffer.getCursor();
-    while (third_processor.getSequence()->get() < expected_sequence) {}
+	gettimeofday(&end_time, NULL);
 
-    gettimeofday(&end_time, NULL);
+	double start, end;
+	start = start_time.tv_sec + ((double) start_time.tv_usec / 1000000);
+	end = end_time.tv_sec + ((double) end_time.tv_usec / 1000000);
 
-    double start, end;
-    start = start_time.tv_sec + ((double) start_time.tv_usec / 1000000);
-    end = end_time.tv_sec + ((double) end_time.tv_usec / 1000000);
+	std::cout.precision(15);
+	std::cout << "1P-3EP-PIPELINE performance: ";
+	std::cout << (iterations * 1.0) / (end - start) << " ops/secs" << std::endl;
 
-    std::cout.precision(15);
-    std::cout << "1P-3EP-PIPELINE performance: ";
-    std::cout << (iterations * 1.0) / (end - start)
-              << " ops/secs" << std::endl;
+	first_processor.halt();
+	second_processor.halt();
+	third_processor.halt();
 
-    first_processor.halt();
-    second_processor.halt();
-    third_processor.halt();
+	first_consumer.join();
+	second_consumer.join();
+	third_consumer.join();
 
-    first_consumer.join();
-    second_consumer.join();
-    third_consumer.join();
-
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
