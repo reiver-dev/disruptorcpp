@@ -21,15 +21,19 @@ public:
 	}
 
 	long get() const {
-		return Util::getMinimumSequence(sequences);
+		return Util::getMinimumSequence(begin(), end());
 	}
 
 	bool isEmpty() const {
 		return sequences.size() == 0;
 	}
 
-	const std::vector<Sequence *>& data() const {
-		return sequences;
+	std::vector<Sequence *>::const_iterator begin() const {
+		return sequences.begin();
+	}
+
+	std::vector<Sequence *>::const_iterator end() const {
+		return sequences.end();
 	}
 
 private:

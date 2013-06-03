@@ -5,12 +5,18 @@
   TypeName(const TypeName&) = delete;      \
   void operator=(const TypeName&) = delete
 
-#define DISALLOW_COPY_ASSIGN_MOVE(TypeName) \
-  TypeName(const TypeName&) = delete;       \
-  void operator=(const TypeName&) = delete; \
-  TypeName(TypeName &&) = delete;           \
-  void operator=(TypeName&&) = delete
+#define DISALLOW_MOVE(TypeName)     \
+	TypeName(TypeName &&) = delete; \
+	void operator=(TypeName&&) = delete
 
+#define DISALLOW_COPY_ASSIGN_MOVE(TypeName) \
+  DISALLOW_COPY_AND_ASSIGN(TypeName);       \
+  DISALLOW_MOVE(TypeName)
+
+#define DISALLOW_CREATION(TypeName)      \
+	DISALLOW_COPY_ASSIGN_MOVE(TypeName); \
+	TypeName() = delete;                 \
+	void *operator new(std::size_t) = delete
 
 #ifndef CACHE_LINE_SIZE_IN_BYTES
 	#define CACHE_LINE_SIZE_IN_BYTES 64

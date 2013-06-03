@@ -52,11 +52,13 @@ public:
 	template<typename RB>
 	SequenceBarrier(RB& ringBuffer) :
 		AlertableBarrier(false), m_cursor(ringBuffer.getSequence()), waitStrategy(ringBuffer.getWaitStrategy()) {
+
 	}
 
 	template<typename RB, typename Collection>
 	SequenceBarrier(RB& ringBuffer, Collection&& dep_sequences) :
 		AlertableBarrier(false), m_cursor(ringBuffer.getSequence()), dependentSequence(dep_sequences), waitStrategy(ringBuffer.getWaitStrategy()) {
+
 	}
 
 	long waitFor(long sequence) {
@@ -79,7 +81,7 @@ public:
 private:
 
 	const Sequence& m_cursor;
-	SequenceGroup dependentSequence;
+	const SequenceGroup dependentSequence;
 
 	WaitStrategy& waitStrategy;
 

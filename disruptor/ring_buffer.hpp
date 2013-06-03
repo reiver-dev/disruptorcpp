@@ -16,11 +16,11 @@ public:
 	typedef SequenceBarrier<WaitStrategy> SequenceBarrier_t;
 
 	long next() {
-		return sequencer.next(gatingSequences);
+		return sequencer.next();
 	}
 
 	long tryNext() {
-		return sequencer.tryNext(gatingSequences);
+		return sequencer.tryNext();
 	}
 
 	void resetTo(long sequence) {
@@ -34,11 +34,11 @@ public:
 
 	template<typename Container>
 	void addGatingSequences(Container&& container) {
-		gatingSequences.assign(std::forward<Container>(container));
+		sequencer.addGatingSequences(std::forward<Container>(container));
 	}
 
 	long getMinimumGatingSequence() {
-		return Util::getMinimumSequence(gatingSequences.data(), getCursor());
+		return sequencer.getMinimumGatingSequence();
 	}
 
 	template<typename Collection>
@@ -51,7 +51,7 @@ public:
 	}
 
 	bool hasAvailableCapacity(int requiredCapacity) {
-		return sequencer.hasAvailableCapacity(gatingSequences, requiredCapacity);
+		return sequencer.hasAvailableCapacity(requiredCapacity);
 	}
 
 	void publish(long sequence) {
@@ -59,7 +59,7 @@ public:
 	}
 
 	long remainingCapacity() {
-		return sequencer.remainingCapacity(gatingSequences);
+		return sequencer.remainingCapacity();
 	}
 
 	WaitStrategy& getWaitStrategy() {
@@ -93,7 +93,7 @@ private:
 
 	WaitStrategy waitStrategy;
 	Sequencer sequencer;
-	SequenceGroup gatingSequences;
+
 };
 
 template<class T, typename Sequencer, typename WaitStrategy>

@@ -33,7 +33,6 @@ struct RingBufferFixture {
 
 		std::array<Sequence*, 1> sequences = {{stub_processor.getSequencePtr()}};
 		ring_buffer.addGatingSequences(sequences);
-
 	}
 
     ~RingBufferFixture() {}
@@ -199,7 +198,7 @@ BOOST_FIXTURE_TEST_CASE(ShouldPreventPublishersOvertakingEventProcessorWrapPoint
 
     // Publisher in a seperate thread
     std::thread thread(
-            // lambda definitioncpp
+            // lambda definition
             [](RingBuffer_t* ring_buffer,
                SequenceBarrier_t* barrier,
                std::atomic<bool>* publisher_completed,

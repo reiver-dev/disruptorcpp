@@ -16,18 +16,18 @@ namespace Util {
 //        return 1 << (32 - Integer.numberOfLeadingZeros(x - 1));
 //    }
 
-long getMinimumSequence(const std::vector<Sequence*>& sequences, long minimum) {
-	size_t n = sequences.size();
-	for (size_t i = 0; i < n; i++) {
-		Sequence *seq = sequences[i];
-		long value = seq->get();
+template<typename Iterator>
+long getMinimumSequence(Iterator begin, Iterator end, long minimum) {
+	for (Iterator seq = begin; seq != end; seq++) {
+		long value = (*seq)->get();
 		minimum = std::min(minimum, value);
 	}
 	return minimum;
 }
 
-long getMinimumSequence(const std::vector<Sequence*>& sequences) {
-	return getMinimumSequence(sequences, std::numeric_limits<long>::max());
+template<typename Iterator>
+long getMinimumSequence(Iterator begin, Iterator end) {
+	return getMinimumSequence(begin, end, std::numeric_limits<long>::max());
 }
 
 
@@ -55,6 +55,18 @@ int log2(int i) {
 		++r;
 	}
 	return r;
+}
+
+template <typename T>
+void arraySetAtomic(T *array, int shift, T value) {
+	static_assert(sizeof(std::atomic<T>) == sizeof(T), "Cannot atomically write array index");
+	return reinterpret_cast<std::atomic<int>*>(&array[shift])->store(value, std::memory_order_release);
+}
+
+template <typename T>
+T arrayGetAtomic(T *array, int shift) {
+	static_assert(sizeof(std::atomic<T>) == sizeof(T), "Cannot atomically read array index");
+	return reinterpret_cast<std::atomic<int>*>(&array[shift])->load(std::memory_order_acquire);
 }
 
 }

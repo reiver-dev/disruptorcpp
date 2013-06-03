@@ -80,8 +80,7 @@ public:
 
 	char pad[ATOMIC_SEQUENCE_PADDING_LENGTH / 2];
 
-	DISALLOW_COPY_ASSIGN_MOVE(PaddedSequence)
-	;
+	DISALLOW_COPY_ASSIGN_MOVE(PaddedSequence);
 };
 
 typedef DoublePaddedSequence Sequence;
