@@ -1,8 +1,6 @@
 #ifndef SEQUENCER_HPP_
 #define SEQUENCER_HPP_
 
-#include <thread>
-
 #include "sequence.hpp"
 #include "sequence_group.hpp"
 #include "utils.h"
@@ -41,7 +39,7 @@ public:
 	}
 
 	long getMinimumSequence() {
-		return Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(), m_cursor.get());
+		return gatingSequences.getMinimumSequence(m_cursor.get());
 	}
 
 	const SequenceGroup& getGatingSequences() const {
@@ -81,7 +79,7 @@ public:
 		long cachedGatingSequence = pad.cachedValue;
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue) {
-			long minSequence = Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(), nextValue);
+			long minSequence = gatingSequences.getMinimumSequence(nextValue);
 			pad.cachedValue = minSequence;
 			if (wrapPoint > minSequence) {
 				return false;
@@ -99,7 +97,7 @@ public:
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue) {
 			long minSequence;
-			while (wrapPoint > (minSequence = Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(), nextValue))) {
+			while (wrapPoint > (minSequence = gatingSequences.getMinimumSequence(nextValue))) {
 				std::this_thread::yield();
 			}
 			pad.cachedValue = minSequence;
@@ -119,7 +117,7 @@ public:
 
 	long remainingCapacity() {
 		long nextValue = pad.nextValue;
-		long consumed = Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(),nextValue);
+		long consumed = gatingSequences.getMinimumSequence(nextValue);
 		long produced = nextValue;
 		return getBufferSize() - (produced - consumed);
 	}
@@ -197,7 +195,7 @@ public:
 			long cachedGatingSequence = m_gatingSequenceCache.get();
 
 			if (wrapPoint > cachedGatingSequence || cachedGatingSequence > current) {
-				long gatingSequence = Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(), current);
+				long gatingSequence = gatingSequences.getMinimumSequence(current);
 				if (wrapPoint > gatingSequence) {
 					std::this_thread::yield(); // TODO, should we spin based on the wait strategy?
 					continue;
@@ -235,7 +233,7 @@ public:
 	}
 
 	long remainingCapacity() {
-		long consumed = Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(), m_cursor.get());
+		long consumed = gatingSequences.getMinimumSequence(m_cursor.get());
 		long produced = m_cursor.get();
 		return getBufferSize() - (produced - consumed);
 	}
@@ -275,7 +273,7 @@ private:
 		long cachedGatingSequence = m_gatingSequenceCache.get();
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > cursorValue) {
-			long minSequence = Util::getMinimumSequence(gatingSequences.begin(), gatingSequences.end(), cursorValue);
+			long minSequence = gatingSequences.getMinimumSequence(cursorValue);
 			m_gatingSequenceCache.set(minSequence);
 			if (wrapPoint > minSequence) {
 				return false;

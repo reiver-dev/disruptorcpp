@@ -21,7 +21,20 @@ public:
 	}
 
 	long get() const {
-		return Util::getMinimumSequence(begin(), end());
+		long minimum = std::numeric_limits<long>::max();
+		for (auto seq = sequences.begin(), end = sequences.end(); seq != end; seq++) {
+			long value = (*seq)->get();
+			minimum = std::min(minimum, value);
+		}
+		return minimum;
+	}
+
+	long getMinimumSequence(long minimum) const {
+		for (auto seq = sequences.begin(), end = sequences.end(); seq != end; seq++) {
+			long value = (*seq)->get();
+			minimum = std::min(minimum, value);
+		}
+		return minimum;
 	}
 
 	bool isEmpty() const {

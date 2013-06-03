@@ -8,8 +8,6 @@
 #include "sequence.hpp"
 #include "sequence_barrier.hpp"
 
-#include "log.hpp"
-
 class BlockingWaitStrategy {
 public:
 

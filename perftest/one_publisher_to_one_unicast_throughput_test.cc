@@ -30,6 +30,7 @@
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <vector>
 
 #include <disruptor.hpp>
 #include "../test/support/stub_event.h"
