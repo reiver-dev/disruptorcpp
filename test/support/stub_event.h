@@ -35,8 +35,8 @@ class StubEventFactory {
 
 class StubBatchHandler : public EventHandler<StubEvent> {
  public:
-    virtual void onEvent(const int64_t& sequence,
-                         const bool& end_of_batch,
+    virtual void onEvent(long sequence,
+                         bool end_of_batch,
                          StubEvent* event) {
         if (event)
             event->set_value(sequence);
