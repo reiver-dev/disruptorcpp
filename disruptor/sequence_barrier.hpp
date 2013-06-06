@@ -3,7 +3,7 @@
 
 #include "macro.hpp"
 #include "sequence.hpp"
-#include "wait_strategy.hpp"
+#include "sequence_group.hpp"
 
 
 class AlertException : std::exception {

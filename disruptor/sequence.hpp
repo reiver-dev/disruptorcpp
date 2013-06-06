@@ -2,7 +2,6 @@
 #define SEQUENCE_HPP_
 
 #include <atomic>
-#include <thread>
 
 #include "macro.hpp"
 

@@ -5,7 +5,6 @@
 
 #include "ring_buffer.hpp"
 #include "sequence.hpp"
-#include "sequencer.hpp"
 #include "sequence_barrier.hpp"
 #include "event_handler.hpp"
 

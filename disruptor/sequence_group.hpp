@@ -1,7 +1,7 @@
 #ifndef SEQUENCE_GROUP_HPP_
 #define SEQUENCE_GROUP_HPP_
 
-#include "utils.h"
+#include "sequence.hpp"
 
 class SequenceGroup {
 public:
@@ -39,14 +39,6 @@ public:
 
 	bool isEmpty() const {
 		return sequences.size() == 0;
-	}
-
-	std::vector<Sequence *>::const_iterator begin() const {
-		return sequences.begin();
-	}
-
-	std::vector<Sequence *>::const_iterator end() const {
-		return sequences.end();
 	}
 
 private:
