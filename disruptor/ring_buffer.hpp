@@ -13,7 +13,7 @@ public:
 
 	typedef Sequencer Sequencer_t;
 	typedef WaitStrategy WaitStrategy_t;
-	typedef SequenceBarrier<WaitStrategy> SequenceBarrier_t;
+	typedef SequenceBarrier<Sequencer, WaitStrategy> SequenceBarrier_t;
 
 	long next() {
 		return sequencer.next();
@@ -25,7 +25,7 @@ public:
 
 	void resetTo(long sequence) {
 		sequencer.claim(sequence);
-		publish(sequence);
+		sequencer.publish(sequence);
 	}
 
 	bool isPublished(long sequence) {
@@ -55,19 +55,12 @@ public:
 	}
 
 	void publish(long sequence) {
-		sequencer.publish(sequence, waitStrategy);
+		sequencer.publish(sequence);
+		waitStrategy.signalAllWhenBlocking();
 	}
 
 	long remainingCapacity() {
 		return sequencer.remainingCapacity();
-	}
-
-	WaitStrategy& getWaitStrategy() {
-		return waitStrategy;
-	}
-
-	const Sequence& getSequence() const {
-		return sequencer.getCursorSequence();
 	}
 
 protected:
@@ -77,11 +70,19 @@ protected:
 	}
 
 	void ensureAvailable(long sequence) {
-		sequencer.ensureAvailable(sequence);
+		sequencer.ensresetToureAvailable(sequence);
 	}
 
 	Sequence* getCursorPtr() {
 		return &sequencer.getCursorSequence();
+	}
+
+	Sequencer& getSequencer() {
+		return sequencer;
+	}
+
+	WaitStrategy& getWaitStrategy() {
+		return waitStrategy;
 	}
 
 	RingBufferImpl(int buffersize) :
@@ -93,6 +94,8 @@ private:
 
 	WaitStrategy waitStrategy;
 	Sequencer sequencer;
+
+	friend SequenceBarrier_t;
 
 };
 

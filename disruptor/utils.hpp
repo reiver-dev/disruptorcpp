@@ -2,6 +2,7 @@
 #define DISRUPTOR_UTILS_H_
 
 #include <atomic>
+#include <bitset>
 
 namespace Util {
 
@@ -11,6 +12,12 @@ int log2(int i) {
 		++r;
 	}
 	return r;
+}
+
+template<typename T>
+constexpr bool isPow2(T number) {
+	static_assert(std::is_integral<T>::value, "Available only for integer types");
+	return std::bitset<sizeof(T)>(number).count() < 2;
 }
 
 template <typename T>

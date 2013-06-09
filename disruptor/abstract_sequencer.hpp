@@ -1,13 +1,15 @@
 #ifndef ABSTRACT_SEQUENCER_HPP_
 #define ABSTRACT_SEQUENCER_HPP_
 
+#include <assert.h>
 #include "macro.hpp"
+#include "utils.hpp"
 
 class AbstractSequencer {
 public:
 
 	AbstractSequencer(int buffersize) : bufferSize(buffersize) {
-
+		assert(Util::isPow2(buffersize));
 	}
 
 	int getBufferSize() {

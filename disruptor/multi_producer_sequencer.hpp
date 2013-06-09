@@ -1,6 +1,7 @@
 #ifndef MULTI_PRODUCER_SEQUENCER_HPP_
 #define MULTI_PRODUCER_SEQUENCER_HPP_
 
+#include <assert.h>
 #include "abstract_sequencer.hpp"
 #include "utils.hpp"
 
@@ -32,9 +33,7 @@ public:
 	}
 
 	long next(int n) {
-		if (n < 1) {
-			throw std::runtime_error("n must be > 0");
-		}
+		assert(n > 0);
 
 		long current;
 		long next;
@@ -66,9 +65,7 @@ public:
 	}
 
 	long tryNext(int n) {
-		if (n < 1) {
-			throw std::runtime_error("n must be > 0");
-		}
+		assert(n > 0);
 
 		long current;
 		long next;
@@ -97,18 +94,16 @@ public:
 		setAvailableBufferValue(0, -1);
 	}
 
-	template<class WaitStrategy>
-	void publish(long sequence, WaitStrategy& waitStrategy) {
+	void publish(long sequence) {
 		setAvailable(sequence);
-		waitStrategy.signalAllWhenBlocking();
 	}
-	template<class WaitStrategy>
-	void publish(long lo, long hi, WaitStrategy& waitStrategy) {
+
+	void publish(long lo, long hi) {
 		for (long l = lo; l <= hi; l++) {
 			setAvailable(l);
 		}
-		waitStrategy.signalAllWhenBlocking();
 	}
+
 	long getHighestPublishedSequence(long lowerBound, long availableSequence) {
 		for (long sequence = lowerBound; sequence <= availableSequence; sequence++) {
 			if (!isAvailable(sequence)) {

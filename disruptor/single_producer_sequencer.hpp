@@ -1,6 +1,7 @@
 #ifndef SINGLE_PRODUCER_SEQUENCER_HPP_
 #define SINGLE_PRODUCER_SEQUENCER_HPP_
 
+#include <assert.h>
 #include "abstract_sequencer.hpp"
 
 class SingleProducerSequencer : public AbstractSequencer {
@@ -22,13 +23,14 @@ public:
 		return pad.nextValue;
 	}
 
-	bool hasAvailableCapacity(const SequenceGroup& gatingSequences, int requiredCapacity) {
+	bool hasAvailableCapacity(int requiredCapacity) {
 		long nextValue = pad.nextValue;
 		long wrapPoint = (nextValue + requiredCapacity) - bufferSize;
 		long cachedGatingSequence = pad.cachedValue;
+		SequenceGroup *gatingSeq = &gatingSequences;
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue) {
-			long minSequence = gatingSequences.getMinimumSequence(nextValue);
+			long minSequence = gatingSeq->getMinimumSequence(nextValue);
 			pad.cachedValue = minSequence;
 			if (wrapPoint > minSequence) {
 				return false;
@@ -39,14 +41,21 @@ public:
 	}
 
 	long next() {
+		return next(1);
+	}
+
+	long next(int n) {
+		assert(n > 0);
+
 		long nextValue = pad.nextValue;
-		long nextSequence = nextValue + 1;
+		long nextSequence = nextValue + n;
 		long wrapPoint = nextSequence - bufferSize;
 		long cachedGatingSequence = pad.cachedValue;
+		SequenceGroup *gatingSeq = &gatingSequences;
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue) {
 			long minSequence;
-			while (wrapPoint > (minSequence = gatingSequences.getMinimumSequence(nextValue))) {
+			while (wrapPoint > (minSequence = gatingSeq->getMinimumSequence(nextValue))) {
 				std::this_thread::yield();
 			}
 			pad.cachedValue = minSequence;
@@ -57,10 +66,15 @@ public:
 	}
 
 	long tryNext() {
-		if (!hasAvailableCapacity(gatingSequences, (int)1)) {
-			throw std::runtime_error("Try failed");
+		return tryNext(1);
+	}
+
+	long tryNext(int n) {
+		assert(n > 0);
+		if (!hasAvailableCapacity(n)) {
+			throw std::out_of_range("Insufficient capacity");
 		}
-		long nextSequence = ++pad.nextValue;
+		long nextSequence = pad.nextValue += n;
 		return nextSequence;
 	}
 
@@ -75,14 +89,12 @@ public:
 		pad.nextValue = sequence;
 	}
 
-	template<class WaitStrategy>
-	void publish(long sequence, WaitStrategy& waitStrategy) {
+	void publish(long sequence) {
 		m_cursor.set(sequence);
-		waitStrategy.signalAllWhenBlocking();
 	}
 
-	void ensureAvailable(long sequence) {
-		//
+	void publish(long lo, long hi) {
+		publish(hi);
 	}
 
 	bool isAvailable(long sequence) const {
@@ -95,6 +107,10 @@ public:
 
 	Sequence& getCursorSequence() {
 		return m_cursor;
+	}
+
+	long getHighestPublishedSequence(long lowerBound, long availableSequence) {
+		return availableSequence;
 	}
 
 private:

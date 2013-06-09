@@ -35,38 +35,50 @@ protected:
 		m_alerted.store(true, std::memory_order::memory_order_release);
 	}
 
-
 private:
 	std::atomic<bool> m_alerted;
 };
 
 
-template <typename WaitStrategy>
+template <typename Sequencer, typename WaitStrategy>
 class SequenceBarrier : public AlertableBarrier {
 public:
 
-	SequenceBarrier() : AlertableBarrier(false), m_cursor(), dependentSequence(), waitStrategy(nullptr) {
-
-	}
-
 	template<typename RB>
 	SequenceBarrier(RB& ringBuffer) :
-		AlertableBarrier(false), m_cursor(ringBuffer.getSequence()), waitStrategy(ringBuffer.getWaitStrategy()) {
+		AlertableBarrier(false),
+		sequencer(ringBuffer.getSequencer()),
+		waitStrategy(ringBuffer.getWaitStrategy()),
+		m_cursor(sequencer.getCursorSequence()) {
 
 	}
 
 	template<typename RB, typename Collection>
 	SequenceBarrier(RB& ringBuffer, Collection&& dep_sequences) :
-		AlertableBarrier(false), m_cursor(ringBuffer.getSequence()), dependentSequence(dep_sequences), waitStrategy(ringBuffer.getWaitStrategy()) {
+		AlertableBarrier(false),
+		sequencer(ringBuffer.getSequencer()),
+		waitStrategy(ringBuffer.getWaitStrategy()),
+		m_cursor(sequencer.getCursorSequence()),
+		dependentSequence(dep_sequences) {
 
 	}
 
 	long waitFor(long sequence) {
-		return waitStrategy.waitFor(sequence, m_cursor, dependentSequence, *this);
+		checkAlert();
+		long availableSequence = waitStrategy.waitFor(sequence, m_cursor, dependentSequence, *this);
+		if (availableSequence < sequence) {
+			return availableSequence;
+		}
+		return sequencer.getHighestPublishedSequence(sequence, availableSequence);
 	}
 
 	long waitFor(long sequence, long micros) {
-		return waitStrategy.waitFor(sequence, m_cursor, dependentSequence, *this, micros);
+		checkAlert();
+		long availableSequence = waitStrategy.waitFor(sequence, m_cursor, dependentSequence, *this, micros);
+		if (availableSequence < sequence) {
+			return availableSequence;
+		}
+		return sequencer.getHighestPublishedSequence(sequence, availableSequence);
 	}
 
 	long getCursor() const {
@@ -80,10 +92,11 @@ public:
 
 private:
 
+	Sequencer& sequencer;
+	WaitStrategy& waitStrategy;
+
 	const Sequence& m_cursor;
 	const SequenceGroup dependentSequence;
-
-	WaitStrategy& waitStrategy;
 
 	DISALLOW_COPY_ASSIGN_MOVE(SequenceBarrier);
 };
