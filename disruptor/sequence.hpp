@@ -47,7 +47,7 @@ private:
 //----------------------------------------------------
 
 struct LeftPadding {
-	char pad[ATOMIC_SEQUENCE_PADDING_LENGTH / 2];
+	char pad[CACHE_LINE_SIZE_IN_BYTES / 2];
 };
 
 struct RightPadding {
@@ -78,12 +78,12 @@ public:
 		//
 	}
 
-	char pad[ATOMIC_SEQUENCE_PADDING_LENGTH / 2];
+	char pad[ATOMIC_SEQUENCE_PADDING_LENGTH];
 
 	DISALLOW_COPY_ASSIGN_MOVE(PaddedSequence);
 };
 
-typedef DoublePaddedSequence Sequence;
+using Sequence = DoublePaddedSequence;
 
 INTERNAL_NAMESPACE_END
 
