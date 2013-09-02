@@ -1,6 +1,8 @@
 #ifndef EVENT_HANDLER_HPP_
 #define EVENT_HANDLER_HPP_
 
+INTERNAL_NAMESPACE_BEGIN
+
 template<typename T>
 class EventHandler {
 public:
@@ -17,5 +19,6 @@ public:
 
 };
 
+INTERNAL_NAMESPACE_END
 
 #endif /* EVENT_HANDLER_HPP_ */

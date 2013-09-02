@@ -5,6 +5,8 @@
 #include "macro.hpp"
 #include "utils.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 class AbstractSequencer {
 public:
 
@@ -41,6 +43,6 @@ protected:
 	DISALLOW_COPY_ASSIGN_MOVE(AbstractSequencer);
 };
 
-
+INTERNAL_NAMESPACE_END
 
 #endif /* ABSTRACT_SEQUENCER_HPP_ */

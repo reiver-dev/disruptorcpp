@@ -3,6 +3,8 @@
 
 #include "sequence.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 class SequenceGroup {
 public:
 
@@ -44,5 +46,7 @@ public:
 private:
 	std::vector<Sequence *> sequences;
 };
+
+INTERNAL_NAMESPACE_END
 
 #endif /* SEQUENCE_GROUP_HPP_ */

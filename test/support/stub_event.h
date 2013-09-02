@@ -5,6 +5,7 @@
 #include "long_event.h"
 #include <disruptor.hpp>
 
+using disruptor::EventHandler;
 
 class StubEvent : public LongEvent {
  public:

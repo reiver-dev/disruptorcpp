@@ -5,6 +5,7 @@
 #include "sequence.hpp"
 #include "sequence_group.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
 
 class AlertException : std::exception {
 
@@ -100,5 +101,7 @@ private:
 
 	DISALLOW_COPY_ASSIGN_MOVE(SequenceBarrier);
 };
+
+INTERNAL_NAMESPACE_END
 
 #endif /* SEQUENCE_BARRIER_HPP_ */

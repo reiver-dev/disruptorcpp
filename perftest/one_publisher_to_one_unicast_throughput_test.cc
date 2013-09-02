@@ -35,6 +35,8 @@
 #include <disruptor.hpp>
 #include "../test/support/stub_event.h"
 
+using namespace disruptor;
+
 typedef RingBuffer<StubEvent, SingleProducerSequencer, YieldStrategy> RingBuffer_t;
 typedef BatchEventProcessor<RingBuffer_t> EventProcessor_t;
 
@@ -63,7 +65,9 @@ int main(int arc, char** argv) {
 	}
 
 	long expected_sequence = ring_buffer.getCursor();
+
 	while (processor.getSequence()->get() < expected_sequence) {
+
 	}
 
 	gettimeofday(&end_time, NULL);

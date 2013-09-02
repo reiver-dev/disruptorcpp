@@ -4,6 +4,9 @@
 #include <assert.h>
 #include "abstract_sequencer.hpp"
 #include "utils.hpp"
+#include "macro.hpp"
+
+INTERNAL_NAMESPACE_BEGIN
 
 class MultiProducerSequencer : AbstractSequencer {
 public:
@@ -160,6 +163,8 @@ private:
 	int indexShift;
 
 };
+
+INTERNAL_NAMESPACE_END
 
 
 #endif /* MULTI_PRODUCER_SEQUENCER_HPP_ */

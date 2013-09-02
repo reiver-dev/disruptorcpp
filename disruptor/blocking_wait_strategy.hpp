@@ -8,6 +8,8 @@
 #include "sequence_barrier.hpp"
 #include "sequence_group.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 class BlockingWaitStrategy {
 public:
 
@@ -66,5 +68,6 @@ private:
 	std::condition_variable m_condition;
 };
 
+INTERNAL_NAMESPACE_END
 
 #endif /* BLOCKING_WAIT_STRATEGY_HPP_ */

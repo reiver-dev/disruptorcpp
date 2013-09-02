@@ -7,6 +7,8 @@
 #include "sequence_barrier.hpp"
 #include "sequence_group.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 template<typename Sequencer, typename WaitStrategy>
 class RingBufferImpl {
 public:
@@ -169,5 +171,7 @@ public:
 	}
 
 };
+
+INTERNAL_NAMESPACE_END
 
 #endif /* RING_BUFFER_HPP_ */

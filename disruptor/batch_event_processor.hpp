@@ -8,6 +8,8 @@
 #include "sequence_barrier.hpp"
 #include "event_handler.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 template<class RingBuffer>
 class BatchEventProcessor {
 public:
@@ -80,5 +82,7 @@ private:
 	EventHandler_t * const m_eventHandler;
 
 };
+
+INTERNAL_NAMESPACE_END
 
 #endif /* BATCH_EVENT_PROCESSOR_HPP_ */

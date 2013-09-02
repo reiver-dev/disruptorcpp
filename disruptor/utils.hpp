@@ -3,6 +3,9 @@
 
 #include <atomic>
 #include <bitset>
+#include "macro.hpp"
+
+INTERNAL_NAMESPACE_BEGIN
 
 namespace Util {
 
@@ -33,5 +36,7 @@ T arrayGetAtomic(T *array, int shift) {
 }
 
 }
+
+INTERNAL_NAMESPACE_END
 
 #endif // DISRUPTOR_UTILS_H_

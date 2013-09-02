@@ -7,6 +7,8 @@
 #include "sequence_barrier.hpp"
 #include "sequence_group.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 class BusySpinStrategy {
 public:
 
@@ -66,5 +68,7 @@ public:
 	DISALLOW_COPY_ASSIGN_MOVE(BusySpinStrategy)	;
 };
 
+
+INTERNAL_NAMESPACE_END
 
 #endif /* BUSYSPIN_WAIT_STRATEGY_HPP_ */

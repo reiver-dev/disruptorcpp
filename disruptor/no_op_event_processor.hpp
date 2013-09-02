@@ -3,6 +3,8 @@
 
 #include "ring_buffer.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
+
 template<class T, typename Sequencer, typename WaitStrategy>
 class NoOpEventProcessor {
 
@@ -29,5 +31,6 @@ private:
 	RingBuffer_t* m_ring_buffer;
 };
 
+INTERNAL_NAMESPACE_END
 
 #endif /* NO_OP_EVENT_PROCESSOR_HPP_ */

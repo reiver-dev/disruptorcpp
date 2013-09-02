@@ -5,6 +5,7 @@
 
 #include "macro.hpp"
 
+INTERNAL_NAMESPACE_BEGIN
 
 class FlatSequence {
 public:
@@ -83,5 +84,7 @@ public:
 };
 
 typedef DoublePaddedSequence Sequence;
+
+INTERNAL_NAMESPACE_END
 
 #endif /* SEQUENCE_HPP_ */

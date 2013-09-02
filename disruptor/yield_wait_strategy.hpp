@@ -1,9 +1,11 @@
 #ifndef YIELD_WAIT_STRATEGY_HPP_
 #define YIELD_WAIT_STRATEGY_HPP_
 
-#include "macro.hpp"
 #include "sequence_barrier.hpp"
 #include "sequence_group.hpp"
+#include "macro.hpp"
+
+INTERNAL_NAMESPACE_BEGIN
 
 class YieldStrategy {
 public:
@@ -49,5 +51,6 @@ private:
 	DISALLOW_COPY_ASSIGN_MOVE(YieldStrategy);
 };
 
+INTERNAL_NAMESPACE_END
 
 #endif /* YIELD_WAIT_STRATEGY_HPP_ */

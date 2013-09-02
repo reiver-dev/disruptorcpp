@@ -27,5 +27,10 @@
 #define SEQUENCE_PADDING_LENGTH \
     (CACHE_LINE_SIZE_IN_BYTES - sizeof(long))
 
+//#define INTERNAL_NAMESPACE_BEGIN namespace disruptor { namespace detail {
+//#define INTERNAL_NAMESPACE_END }}
+
+#define INTERNAL_NAMESPACE_BEGIN namespace disruptor { namespace detail {
+#define INTERNAL_NAMESPACE_END }}
 
 #endif /* MACRO_HPP_ */

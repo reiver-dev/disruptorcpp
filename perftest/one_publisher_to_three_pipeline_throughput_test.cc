@@ -36,6 +36,9 @@
 
 #include "../test/support/stub_event.h"
 
+
+using namespace disruptor;
+
 typedef RingBuffer<StubEvent, SingleProducerSequencer, YieldStrategy> RingBuffer_t;
 typedef BatchEventProcessor<RingBuffer_t> EventProcessor_t;
 typedef RingBuffer_t::SequenceBarrier_t SequenceBarrier_t;

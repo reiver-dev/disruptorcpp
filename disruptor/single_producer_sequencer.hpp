@@ -1,8 +1,12 @@
 #ifndef SINGLE_PRODUCER_SEQUENCER_HPP_
 #define SINGLE_PRODUCER_SEQUENCER_HPP_
 
-#include <assert.h>
+#include <cassert>
+
 #include "abstract_sequencer.hpp"
+#include "macro.hpp"
+
+INTERNAL_NAMESPACE_BEGIN
 
 class SingleProducerSequencer : public AbstractSequencer {
 private:
@@ -117,6 +121,6 @@ private:
 	Padding pad;
 };
 
-
+INTERNAL_NAMESPACE_END
 
 #endif /* SINGLE_PRODUCER_SEQUENCER_HPP_ */

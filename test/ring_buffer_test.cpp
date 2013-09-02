@@ -18,9 +18,15 @@
 #define LOG(x) std::cout << x << std::endl
 #define LOGV(x) std::cout << #x " = " << x << std::endl
 
+
+using namespace disruptor;
+
+
 typedef RingBuffer<StubEvent, SingleProducerSequencer, BlockingWaitStrategy> RingBuffer_t;
-typedef NoOpEventProcessor<StubEvent, SingleProducerSequencer, BlockingWaitStrategy> EventProcessor_t;
+typedef detail::NoOpEventProcessor<StubEvent, SingleProducerSequencer, BlockingWaitStrategy> EventProcessor_t;
 typedef RingBuffer_t::SequenceBarrier_t SequenceBarrier_t;
+
+using disruptor::detail::Sequence;
 
 namespace test {
 
@@ -69,7 +75,7 @@ class TestEventProcessor {
     TestEventProcessor(SequenceBarrier_t* barrier) :
         barrier_(barrier) {}
 
-    Sequence* getSequence() { return &sequence_; }
+    detail::Sequence* getSequence() { return &sequence_; }
 
     void halt() {}
     void run() {
