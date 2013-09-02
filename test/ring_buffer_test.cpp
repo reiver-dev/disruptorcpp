@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
-#include <disruptor.hpp>
+#include <disruptor/disruptor.hpp>
 
 #include "support/stub_event.h"
 

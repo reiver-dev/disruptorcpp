@@ -32,7 +32,7 @@
 #include <thread>
 #include <vector>
 
-#include <disruptor.hpp>
+#include <disruptor/disruptor.hpp>
 #include "../test/support/stub_event.h"
 
 using namespace disruptor;

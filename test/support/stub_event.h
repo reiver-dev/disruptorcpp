@@ -3,7 +3,7 @@
 
 #include <string>
 #include "long_event.h"
-#include <disruptor.hpp>
+#include <disruptor/disruptor.hpp>
 
 using disruptor::EventHandler;
 

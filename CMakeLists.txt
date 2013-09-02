@@ -13,7 +13,7 @@ else()
     set(CFLAGS ${CFLAGS} -O3 -g3)
 endif()
 
-include_directories(disruptor)
+include_directories(include)
 
 add_definitions(${CFLAGS})
 add_subdirectory(test)
