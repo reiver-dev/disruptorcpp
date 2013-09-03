@@ -73,15 +73,6 @@ public:
 		return sequencer.getHighestPublishedSequence(sequence, availableSequence);
 	}
 
-	long waitFor(long sequence, long micros) {
-		checkAlert();
-		long availableSequence = waitStrategy.waitFor(sequence, m_cursor, dependentSequence, *this, micros);
-		if (availableSequence < sequence) {
-			return availableSequence;
-		}
-		return sequencer.getHighestPublishedSequence(sequence, availableSequence);
-	}
-
 	long getCursor() const {
 		return m_cursor.get();
 	}

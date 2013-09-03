@@ -1,5 +1,5 @@
-#ifndef BLOCKING_WAIT_STRATEGY_HPP_
-#define BLOCKING_WAIT_STRATEGY_HPP_
+#ifndef TIMEOUT_BLOCKING_WAIT_STRATEGY_HPP_
+#define TIMEOUT_BLOCKING_WAIT_STRATEGY_HPP_
 
 #include <mutex>
 #include <condition_variable>
@@ -10,12 +10,13 @@
 
 INTERNAL_NAMESPACE_BEGIN
 
-class BlockingWaitStrategy {
+class TimeoutBlockingWaitStrategy {
 public:
 
 	long waitFor(long sequence, const Sequence& cursor,
 			const SequenceGroup& dependent,
 			const AlertableBarrier& barrier) {
+
 		long availableSequence;
 
 		if ((availableSequence = cursor.get()) < sequence) {
@@ -23,7 +24,12 @@ public:
 
 			while ((availableSequence = cursor.get()) < sequence) {
 				barrier.checkAlert();
-				m_condition.wait(ulock);
+				std::cv_status status =
+						m_condition.wait_for(ulock, std::chrono::microseconds(m_timeout_micros));
+				if (status == std::cv_status::timeout) {
+					break;
+				}
+
 			}
 
 		}
@@ -41,11 +47,17 @@ public:
 		m_condition.notify_all();
 	}
 
+	void configure(int64_t micros) {
+		m_timeout_micros = micros;
+	}
+
 private:
+
+	int64_t m_timeout_micros = 1000;
 	std::mutex m_mutex;
 	std::condition_variable m_condition;
 };
 
 INTERNAL_NAMESPACE_END
 
-#endif /* BLOCKING_WAIT_STRATEGY_HPP_ */
+#endif /* TIMEOUT_BLOCKING_WAIT_STRATEGY_HPP_ */

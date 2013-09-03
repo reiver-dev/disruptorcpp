@@ -13,6 +13,7 @@
 #include "yield_wait_strategy.hpp"
 #include "blocking_wait_strategy.hpp"
 #include "busyspin_wait_strategy.hpp"
+#include "timeout_blocking_wait_strategy.hpp"
 
 
 namespace disruptor {
@@ -25,8 +26,9 @@ namespace disruptor {
 	using detail::MultiProducerSequencer;
 
 	using detail::YieldStrategy;
-	using detail::BlockingWaitStrategy;
 	using detail::BusySpinStrategy;
+	using detail::BlockingWaitStrategy;
+	using detail::TimeoutBlockingWaitStrategy;
 }
 
 #endif /* DISRUPTOR_HPP_ */

@@ -22,11 +22,10 @@
 using namespace disruptor;
 
 
-typedef RingBuffer<StubEvent, SingleProducerSequencer, BlockingWaitStrategy> RingBuffer_t;
-typedef detail::NoOpEventProcessor<StubEvent, SingleProducerSequencer, BlockingWaitStrategy> EventProcessor_t;
+typedef RingBuffer<StubEvent, SingleProducerSequencer, TimeoutBlockingWaitStrategy> RingBuffer_t;
+typedef detail::NoOpEventProcessor<StubEvent, SingleProducerSequencer, TimeoutBlockingWaitStrategy> EventProcessor_t;
 typedef RingBuffer_t::SequenceBarrier_t SequenceBarrier_t;
 
-using disruptor::detail::Sequence;
 
 namespace test {
 
@@ -39,6 +38,7 @@ struct RingBufferFixture {
 
 		std::array<Sequence*, 1> sequences = {{stub_processor.getSequencePtr()}};
 		ring_buffer.addGatingSequences(sequences);
+		ring_buffer.configureWaitStrategy(5000);
 	}
 
     ~RingBufferFixture() {}
@@ -105,7 +105,7 @@ BOOST_FIXTURE_TEST_CASE(shouldClaimAndGet, RingBufferFixture) {
     old_event->set_value(expected_event.value());
     ring_buffer.publish(claim_sequence);
 
-    long sequence = barrier.waitFor(0, 5000);
+    long sequence = barrier.waitFor(0);
     BOOST_CHECK(sequence == 0);
 
     StubEvent* event = ring_buffer.get(sequence);
@@ -123,7 +123,7 @@ BOOST_FIXTURE_TEST_CASE(ShouldClaimAndGetWithTimeout, RingBufferFixture) {
     old_event->set_value(expected_event.value());
     ring_buffer.publish(claim_sequence);
 
-    int64_t sequence = barrier.waitFor(0, 5000);
+    int64_t sequence = barrier.waitFor(0);
     BOOST_CHECK(sequence == 0);
 
     StubEvent* event = ring_buffer.get(sequence);
@@ -133,7 +133,7 @@ BOOST_FIXTURE_TEST_CASE(ShouldClaimAndGetWithTimeout, RingBufferFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(ShouldGetWithTimeout, RingBufferFixture) {
-    int64_t sequence = barrier.waitFor(0, 5000);
+    int64_t sequence = barrier.waitFor(0);
     BOOST_CHECK(sequence == Sequence::INITIAL_VALUE);
 }
 

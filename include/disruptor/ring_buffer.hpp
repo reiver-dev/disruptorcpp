@@ -67,6 +67,11 @@ public:
 		return sequencer.remainingCapacity();
 	}
 
+	template<typename... ARGS>
+	void configureWaitStrategy(ARGS&&... args) {
+		waitStrategy.configure(std::forward<ARGS>(args)...);
+	}
+
 protected:
 
 	void claim(long sequence) {
