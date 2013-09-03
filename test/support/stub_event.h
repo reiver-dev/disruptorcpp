@@ -32,6 +32,10 @@ class StubEventFactory {
 		return new StubEvent();
 	}
 
+	void operator()(StubEvent *e) const {
+		//
+	}
+
 };
 
 class StubBatchHandler : public EventHandler<StubEvent> {

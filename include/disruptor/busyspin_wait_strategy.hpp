@@ -65,7 +65,7 @@ public:
 
 	}
 
-	DISALLOW_COPY_ASSIGN_MOVE(BusySpinStrategy)	;
+	DISALLOW_COPY_MOVE(BusySpinStrategy);
 };
 
 

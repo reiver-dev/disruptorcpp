@@ -1,11 +1,13 @@
 #ifndef RING_BUFFER_HPP_
 #define RING_BUFFER_HPP_
 
-#include <assert.h>
+#include <cassert>
 
 #include "sequence.hpp"
 #include "sequence_barrier.hpp"
 #include "sequence_group.hpp"
+
+#include "macro.hpp"
 
 INTERNAL_NAMESPACE_BEGIN
 
@@ -72,7 +74,7 @@ protected:
 	}
 
 	void ensureAvailable(long sequence) {
-		sequencer.ensresetToureAvailable(sequence);
+		sequencer.hasAvailableCapacity(sequence);
 	}
 
 	Sequence* getCursorPtr() {
@@ -103,29 +105,6 @@ private:
 
 template<class T, typename Sequencer, typename WaitStrategy>
 class RingBuffer: public RingBufferImpl<Sequencer, WaitStrategy> {
-private:
-	typedef RingBufferImpl<Sequencer, WaitStrategy> BaseType;
-
-	template<typename A1, typename A2, typename A3>
-	friend class NoOpEventProcessor;
-
-	int m_indexMask;
-	int m_bufferSize;
-	T** m_entries;
-
-	template<typename EventFactory>
-	void fill(int size, EventFactory factory) {
-		for (int i = 0; i < size; i++) {
-			m_entries[i] = factory();
-		}
-	}
-
-	void destroy(int size) {
-		for (int i = 0; i < size; i++) {
-			delete m_entries[i];
-		}
-	}
-
 public:
 
 	typedef T ValueType;
@@ -133,12 +112,12 @@ public:
 	template<typename EventFactory>
 	RingBuffer(int buffersize, EventFactory factory) :
 			BaseType(buffersize), m_indexMask(buffersize - 1), m_bufferSize(
-					buffersize), m_entries(new T*[buffersize]) {
+					buffersize), m_entries(new ValueType[buffersize]) {
 		fill(buffersize, factory);
 	}
 
 	~RingBuffer() {
-		destroy(m_bufferSize);
+//		destroy(m_bufferSize);
 		delete[] m_entries;
 	}
 
@@ -148,7 +127,7 @@ public:
 	}
 
 	T* get(long sequence) {
-		return m_entries[(int) sequence & m_indexMask];
+		return &m_entries[(int) sequence & m_indexMask];
 	}
 
 	template<class EventTranslator>
@@ -169,6 +148,32 @@ public:
 	int getBufferSize() const {
 		return m_bufferSize;
 	}
+
+private:
+
+	typedef RingBufferImpl<Sequencer, WaitStrategy> BaseType;
+
+	template<typename A1, typename A2, typename A3>
+	friend class NoOpEventProcessor;
+
+	int m_indexMask;
+	int m_bufferSize;
+	ValueType* m_entries;
+
+	template<typename EventFactory>
+	void fill(int size, EventFactory factory) {
+		for (int i = 0; i < size; i++) {
+			factory(&m_entries[i]);
+		}
+	}
+
+	void destroy(int size) {
+		for (int i = 0; i < size; i++) {
+			delete m_entries[i];
+		}
+	}
+
+	DISALLOW_COPY_MOVE(RingBuffer);
 
 };
 

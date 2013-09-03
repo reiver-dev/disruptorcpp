@@ -41,7 +41,7 @@ public:
 private:
 	std::atomic<long> m_value;
 
-    DISALLOW_COPY_ASSIGN_MOVE(FlatSequence);
+	DISALLOW_COPY_MOVE(FlatSequence);
 };
 
 //----------------------------------------------------
@@ -65,7 +65,7 @@ public:
 		//
 	}
 
-	DISALLOW_COPY_ASSIGN_MOVE(DoublePaddedSequence);
+	DISALLOW_COPY_MOVE(DoublePaddedSequence);
 };
 
 class PaddedSequence : public FlatSequence {
@@ -80,7 +80,7 @@ public:
 
 	char pad[ATOMIC_SEQUENCE_PADDING_LENGTH];
 
-	DISALLOW_COPY_ASSIGN_MOVE(PaddedSequence);
+	DISALLOW_COPY_MOVE(PaddedSequence);
 };
 
 using Sequence = DoublePaddedSequence;

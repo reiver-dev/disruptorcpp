@@ -40,7 +40,7 @@ protected:
 	Sequence m_cursor;
 	int bufferSize;
 
-	DISALLOW_COPY_ASSIGN_MOVE(AbstractSequencer);
+	DISALLOW_COPY_MOVE(AbstractSequencer);
 };
 
 INTERNAL_NAMESPACE_END

@@ -48,7 +48,7 @@ private:
 		}
 	}
 
-	DISALLOW_COPY_ASSIGN_MOVE(YieldStrategy);
+	DISALLOW_COPY_MOVE(YieldStrategy);
 };
 
 INTERNAL_NAMESPACE_END

@@ -99,7 +99,7 @@ private:
 	const Sequence& m_cursor;
 	const SequenceGroup dependentSequence;
 
-	DISALLOW_COPY_ASSIGN_MOVE(SequenceBarrier);
+	DISALLOW_COPY_MOVE(SequenceBarrier);
 };
 
 INTERNAL_NAMESPACE_END
