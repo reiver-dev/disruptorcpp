@@ -44,11 +44,7 @@ public:
 		return true;
 	}
 
-	long next() {
-		return next(1);
-	}
-
-	long next(int n) {
+	long next(int n = 1) {
 		assert(n > 0);
 
 		long nextValue = pad.nextValue;
@@ -69,11 +65,7 @@ public:
 		return nextSequence;
 	}
 
-	long tryNext() {
-		return tryNext(1);
-	}
-
-	long tryNext(int n) {
+	long tryNext(int n = 1) {
 		assert(n > 0);
 		if (!hasAvailableCapacity(n)) {
 			throw std::out_of_range("Insufficient capacity");

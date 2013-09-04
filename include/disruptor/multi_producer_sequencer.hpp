@@ -31,11 +31,7 @@ public:
 		m_cursor.set(sequence);
 	}
 
-	long next() {
-		return next(1);
-	}
-
-	long next(int n) {
+	long next(int n = 1) {
 		assert(n > 0);
 
 		long current;
@@ -63,11 +59,7 @@ public:
 		return next;
 	}
 
-	long tryNext() {
-		return tryNext(1);
-	}
-
-	long tryNext(int n) {
+	long tryNext(int n = 1) {
 		assert(n > 0);
 
 		long current;
