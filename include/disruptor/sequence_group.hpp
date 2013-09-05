@@ -1,6 +1,7 @@
 #ifndef SEQUENCE_GROUP_HPP_
 #define SEQUENCE_GROUP_HPP_
 
+#include <algorithm>
 #include "sequence.hpp"
 
 INTERNAL_NAMESPACE_BEGIN
@@ -18,8 +19,17 @@ public:
 	}
 
 	template<typename Collection>
-	void assign(Collection&& collection) {
+	void add(Collection&& collection) {
 		sequences.assign(collection.begin(), collection.end());
+	}
+
+	template<typename Collection>
+	void remove(Collection&& collection) {
+		std::remove_if(sequences.begin(), sequences.end(),
+				[&collection](Sequence *s) {
+					return std::find(collection.begin(),
+							collection.end(), s) != collection.end();
+				});
 	}
 
 	long get() const {

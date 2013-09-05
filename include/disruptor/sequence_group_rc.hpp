@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <algorithm>
 
 #include "sequence.hpp"
 #include "object_storage.hpp"
@@ -10,25 +11,22 @@
 
 INTERNAL_NAMESPACE_BEGIN
 
-class SequenceGroupRc : public Storable {
+class RefCountedSequenceGroup : public Storable {
 public:
 
-	static SequenceGroupRc* create(size_t length) {
-		SequenceGroupRc *g = (SequenceGroupRc*)
-				malloc(sizeof(SequenceGroupRc) + (length - 1) * sizeof(uintptr_t));
+	static RefCountedSequenceGroup* create(size_t length) {
+		assert(length > 0);
+		RefCountedSequenceGroup *g = (RefCountedSequenceGroup*)
+				malloc(sizeof(RefCountedSequenceGroup) + (length - 1) * sizeof(uintptr_t));
 		g->length = length;
 		return g;
 	}
 
-	static SequenceGroupRc* createEmpty() {
-		SequenceGroupRc *g = (SequenceGroupRc*)
-				malloc(sizeof(SequenceGroupRc));
+	static RefCountedSequenceGroup* createEmpty() {
+		RefCountedSequenceGroup *g = (RefCountedSequenceGroup*)
+				malloc(sizeof(RefCountedSequenceGroup));
 		g->length = 0;
 		return g;
-	}
-
-	Sequence*& at(size_t idx) {
-		return sequences[idx];
 	}
 
 	long getMinimumSequence(long minimum) const {
@@ -47,11 +45,19 @@ public:
 		return length;
 	}
 
+	Sequence** begin() {
+		return sequences;
+	}
+
+	Sequence** end() {
+		return sequences + length;
+	}
+
 private:
 	size_t length = 0;
 	Sequence *sequences[1];
 
-	DISALLOW_COPY_MOVE(SequenceGroupRc);
+	DISALLOW_COPY_MOVE(RefCountedSequenceGroup);
 
 };
 
@@ -61,7 +67,57 @@ struct DeleteSequenceGroup {
 	}
 };
 
-typedef ObjectStorage<4, DeleteSequenceGroup> SequenceGroupStorage;
+class SequenceGroupStorage {
+public:
+	SequenceGroupStorage() : storage(RefCountedSequenceGroup::createEmpty()) {
+		//
+	}
+
+	template<typename Collection>
+	void add(Collection&& sequences) {
+		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*) storage.write_lock();
+
+		size_t oldsize = oldSeq->size();
+		RefCountedSequenceGroup *newSeq = RefCountedSequenceGroup::create(oldsize + sequences.size());
+
+		std::copy(oldSeq->begin(), oldSeq->end(), newSeq->begin());
+		std::copy(begin(sequences), end(sequences), newSeq->begin() + oldsize);
+
+		storage.write_unlock(newSeq);
+	}
+
+	template<typename Collection>
+	void remove(Collection&& sequences) {
+		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*)storage.write_lock();
+
+		int numToRemove = std::count_if(oldSeq->begin(), oldSeq->end(), [&sequences](Sequence *s){
+			return std::find(sequences.begin(), sequences.end(), s) != sequences.end();
+		});
+
+		RefCountedSequenceGroup *newSeq = RefCountedSequenceGroup::create(oldSeq->size() - numToRemove);
+
+		std::copy_if(oldSeq->begin(), oldSeq->end(), newSeq->begin(), [sequences](Sequence *s){
+			return std::find(sequences.begin(), sequences.end(), s) != sequences.end();
+		});
+
+		storage.write_unlock(newSeq);
+	}
+
+	long getMinimumSequence(int min) {
+		RefCountedSequenceGroup *seq = (RefCountedSequenceGroup*) storage.aquire();
+		long result = seq->getMinimumSequence(min);
+		storage.release(seq);
+		return result;
+	}
+
+private:
+	ObjectStorage<4, DeleteSequenceGroup> storage;
+
+	DISALLOW_COPY_MOVE(SequenceGroupStorage);
+
+};
+
+//typedef ObjectStorage<4, DeleteSequenceGroup> SequenceGroupStorage;
 
 INTERNAL_NAMESPACE_END
 
