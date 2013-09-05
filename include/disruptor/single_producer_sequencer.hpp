@@ -31,10 +31,9 @@ public:
 		long nextValue = pad.nextValue;
 		long wrapPoint = (nextValue + requiredCapacity) - bufferSize;
 		long cachedGatingSequence = pad.cachedValue;
-		SequenceGroup *gatingSeq = &gatingSequences;
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue) {
-			long minSequence = gatingSeq->getMinimumSequence(nextValue);
+			long minSequence = getMinimumSequence(nextValue);
 			pad.cachedValue = minSequence;
 			if (wrapPoint > minSequence) {
 				return false;
@@ -51,11 +50,10 @@ public:
 		long nextSequence = nextValue + n;
 		long wrapPoint = nextSequence - bufferSize;
 		long cachedGatingSequence = pad.cachedValue;
-		SequenceGroup *gatingSeq = &gatingSequences;
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > nextValue) {
 			long minSequence;
-			while (wrapPoint > (minSequence = gatingSeq->getMinimumSequence(nextValue))) {
+			while (wrapPoint > (minSequence = getMinimumSequence(nextValue))) {
 				std::this_thread::yield();
 			}
 			pad.cachedValue = minSequence;
@@ -76,7 +74,7 @@ public:
 
 	long remainingCapacity() {
 		long nextValue = pad.nextValue;
-		long consumed = gatingSequences.getMinimumSequence(nextValue);
+		long consumed = getMinimumSequence(nextValue);
 		long produced = nextValue;
 		return getBufferSize() - (produced - consumed);
 	}

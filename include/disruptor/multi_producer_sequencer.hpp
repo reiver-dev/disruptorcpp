@@ -24,7 +24,8 @@ public:
 	}
 
 	bool hasAvailableCapacity(int requiredCapacity) {
-		return hasAvailableCapacity(gatingSequences, requiredCapacity, m_cursor.get());
+		bool res = hasAvailableCapacity(requiredCapacity, m_cursor.get());
+		return res;
 	}
 
 	void claim(long sequence) {
@@ -45,7 +46,7 @@ public:
 			long cachedGatingSequence = m_gatingSequenceCache.get();
 
 			if (wrapPoint > cachedGatingSequence || cachedGatingSequence > current) {
-				long gatingSequence = gatingSequences.getMinimumSequence(current);
+				long gatingSequence = getMinimumSequence(current);
 				if (wrapPoint > gatingSequence) {
 					std::this_thread::yield(); // TODO, should we spin based on the wait strategy?
 					continue;
@@ -68,7 +69,7 @@ public:
 		do {
 			current = m_cursor.get();
 			next = current + n;
-			if (!hasAvailableCapacity(gatingSequences, n, current)) {
+			if (!hasAvailableCapacity(n, current)) {
 				throw std::runtime_error("insufficient capacity");
 			}
 		} while (!m_cursor.compareAndSet(current, next));
@@ -77,7 +78,7 @@ public:
 	}
 
 	long remainingCapacity() {
-		long consumed = gatingSequences.getMinimumSequence(m_cursor.get());
+		long consumed = getMinimumSequence(m_cursor.get());
 		long produced = m_cursor.get();
 		return getBufferSize() - (produced - consumed);
 	}
@@ -110,12 +111,12 @@ public:
 
 private:
 
-	bool hasAvailableCapacity(const SequenceGroup& gatingSequences, int requiredCapacity, long cursorValue) {
+	bool hasAvailableCapacity(int requiredCapacity, long cursorValue) {
 		long wrapPoint = (cursorValue + requiredCapacity) - bufferSize;
 		long cachedGatingSequence = m_gatingSequenceCache.get();
 
 		if (wrapPoint > cachedGatingSequence || cachedGatingSequence > cursorValue) {
-			long minSequence = gatingSequences.getMinimumSequence(cursorValue);
+			long minSequence = getMinimumSequence(cursorValue);
 			m_gatingSequenceCache.set(minSequence);
 			if (wrapPoint > minSequence) {
 				return false;

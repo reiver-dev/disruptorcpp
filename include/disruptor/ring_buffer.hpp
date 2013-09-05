@@ -41,6 +41,11 @@ public:
 		sequencer.addGatingSequences(std::forward<Container>(container));
 	}
 
+	template<typename Container>
+	void removeGatingSequences(Container&& container) {
+		sequencer.removeGatingSequences(std::forward<Container>(container));
+	}
+
 	long getMinimumGatingSequence() {
 		return sequencer.getMinimumGatingSequence();
 	}
