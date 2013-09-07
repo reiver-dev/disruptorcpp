@@ -67,18 +67,16 @@ struct DeleteSequenceGroup {
 	}
 };
 
-class SequenceGroupStorage : public ObjectStorage<4, DeleteSequenceGroup> {
-
-	typedef ObjectStorage<4, DeleteSequenceGroup> BaseType;
-
+class SequenceGroupStorage {
 public:
-	SequenceGroupStorage() : BaseType(RefCountedSequenceGroup::createEmpty()) {
+
+	SequenceGroupStorage() : storage(RefCountedSequenceGroup::createEmpty()) {
 		//
 	}
 
 	template<typename Collection>
 	void add(Collection&& sequences) {
-		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*) write_lock();
+		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*) storage.write_lock();
 
 		size_t oldsize = oldSeq->size();
 		RefCountedSequenceGroup *newSeq = RefCountedSequenceGroup::create(oldsize + sequences.size());
@@ -86,12 +84,12 @@ public:
 		std::copy(oldSeq->begin(), oldSeq->end(), newSeq->begin());
 		std::copy(begin(sequences), end(sequences), newSeq->begin() + oldsize);
 
-		write_unlock(newSeq);
+		storage.write_unlock(newSeq);
 	}
 
 	template<typename Collection>
 	void remove(Collection&& sequences) {
-		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*)write_lock();
+		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*)storage.write_lock();
 
 		int numToRemove = std::count_if(oldSeq->begin(), oldSeq->end(), [&sequences](Sequence *s){
 			return std::find(sequences.begin(), sequences.end(), s) != sequences.end();
@@ -103,11 +101,30 @@ public:
 			return std::find(sequences.begin(), sequences.end(), s) != sequences.end();
 		});
 
-		write_unlock(newSeq);
+		storage.write_unlock(newSeq);
+	}
+
+	template<typename FUNC>
+	auto runWith(FUNC f) -> decltype(f(std::declval<const RefCountedSequenceGroup&>())) {
+		auto seq = std::unique_ptr<RefCountedSequenceGroup, Release> (
+				(RefCountedSequenceGroup*) storage.aquire(), storage);
+		return f(*seq.get());
 	}
 
 
 private:
+
+	typedef ObjectStorage<16, DeleteSequenceGroup> Storage;
+
+	struct Release {
+		Storage &storage;
+		Release(Storage& st) : storage(st) {/* */}
+		void operator()(RefCountedSequenceGroup *seq) {
+			storage.release(seq);
+		}
+	};
+
+	Storage storage;
 
 	DISALLOW_COPY_MOVE(SequenceGroupStorage);
 

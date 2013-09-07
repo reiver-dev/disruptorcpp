@@ -44,13 +44,13 @@ public:
 	Storable *aquire() {
 		uintptr_t prev;
 		uintptr_t idx;
-		prev = (uintptr_t) state.fetch_add(COUNT_INC);
+		prev = (uintptr_t) state.fetch_add(COUNT_INC, std::memory_order_acq_rel);
 		idx = prev & OBJECT_MASK;
 		return objects[idx];
 	}
 
 	void release(Storable *obj) {
-		uintptr_t prev = obj->rc.fetch_add(TEMPORAL) + TEMPORAL;
+		uintptr_t prev = obj->rc.fetch_add(TEMPORAL, std::memory_order_acq_rel) + TEMPORAL;
 		if (prev == 0) {
 			dispose(obj);
 		}

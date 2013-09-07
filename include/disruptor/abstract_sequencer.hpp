@@ -38,10 +38,9 @@ public:
 protected:
 
 	long getMinimumSequence(long min) {
-		RefCountedSequenceGroup *seq = (RefCountedSequenceGroup*) gatingSequences.aquire();
-		long result = seq->getMinimumSequence(min);
-		gatingSequences.release(seq);
-		return result;
+		return gatingSequences.runWith([min](const RefCountedSequenceGroup& seq){
+			return seq.getMinimumSequence(min);
+		});
 	}
 
 	Sequence m_cursor;
