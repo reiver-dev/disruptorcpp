@@ -10,7 +10,7 @@ set(CFLAGS -pipe -Wall -pedantic)
 if(DEBUG)
     set(CFLAGS ${CFLAGS} -g3 -DDEBUG)
 else()
-    set(CFLAGS ${CFLAGS} -O3 -g3)
+    set(CFLAGS ${CFLAGS} -O3 -g3 -DNDEBUG)
 endif()
 
 include_directories(include)

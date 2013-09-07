@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "macro.hpp"
 #include "utils.hpp"
-#include "sequence_group.hpp"
+#include "sequence_group_rc.hpp"
 
 INTERNAL_NAMESPACE_BEGIN
 
@@ -38,13 +38,16 @@ public:
 protected:
 
 	long getMinimumSequence(long min) {
-		return gatingSequences.getMinimumSequence(min);
+		RefCountedSequenceGroup *seq = (RefCountedSequenceGroup*) gatingSequences.aquire();
+		long result = seq->getMinimumSequence(min);
+		gatingSequences.release(seq);
+		return result;
 	}
 
 	Sequence m_cursor;
 	int bufferSize;
 
-	SequenceGroup gatingSequences;
+	SequenceGroupStorage gatingSequences;
 
 	DISALLOW_COPY_MOVE(AbstractSequencer);
 };

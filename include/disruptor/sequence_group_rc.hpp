@@ -67,15 +67,18 @@ struct DeleteSequenceGroup {
 	}
 };
 
-class SequenceGroupStorage {
+class SequenceGroupStorage : public ObjectStorage<4, DeleteSequenceGroup> {
+
+	typedef ObjectStorage<4, DeleteSequenceGroup> BaseType;
+
 public:
-	SequenceGroupStorage() : storage(RefCountedSequenceGroup::createEmpty()) {
+	SequenceGroupStorage() : BaseType(RefCountedSequenceGroup::createEmpty()) {
 		//
 	}
 
 	template<typename Collection>
 	void add(Collection&& sequences) {
-		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*) storage.write_lock();
+		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*) write_lock();
 
 		size_t oldsize = oldSeq->size();
 		RefCountedSequenceGroup *newSeq = RefCountedSequenceGroup::create(oldsize + sequences.size());
@@ -83,12 +86,12 @@ public:
 		std::copy(oldSeq->begin(), oldSeq->end(), newSeq->begin());
 		std::copy(begin(sequences), end(sequences), newSeq->begin() + oldsize);
 
-		storage.write_unlock(newSeq);
+		write_unlock(newSeq);
 	}
 
 	template<typename Collection>
 	void remove(Collection&& sequences) {
-		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*)storage.write_lock();
+		RefCountedSequenceGroup *oldSeq = (RefCountedSequenceGroup*)write_lock();
 
 		int numToRemove = std::count_if(oldSeq->begin(), oldSeq->end(), [&sequences](Sequence *s){
 			return std::find(sequences.begin(), sequences.end(), s) != sequences.end();
@@ -100,18 +103,11 @@ public:
 			return std::find(sequences.begin(), sequences.end(), s) != sequences.end();
 		});
 
-		storage.write_unlock(newSeq);
+		write_unlock(newSeq);
 	}
 
-	long getMinimumSequence(int min) {
-		RefCountedSequenceGroup *seq = (RefCountedSequenceGroup*) storage.aquire();
-		long result = seq->getMinimumSequence(min);
-		storage.release(seq);
-		return result;
-	}
 
 private:
-	ObjectStorage<4, DeleteSequenceGroup> storage;
 
 	DISALLOW_COPY_MOVE(SequenceGroupStorage);
 
